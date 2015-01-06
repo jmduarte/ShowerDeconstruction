@@ -65,6 +65,7 @@ class SDProducer : public edm::EDProducer {
       // ----------member data ---------------------------
      double microjet_cone_;
      std::string fatjet_name_;  
+     std::string input_card_;
 };
 
 
@@ -73,7 +74,8 @@ class SDProducer : public edm::EDProducer {
 //
 SDProducer::SDProducer(const edm::ParameterSet& iConfig) :
   microjet_cone_(iConfig.getParameter<double>("MicrojetCone")),
-  fatjet_name_(iConfig.getParameter<std::string>("FatjetName"))
+  fatjet_name_(iConfig.getParameter<std::string>("FatjetName")),
+  input_card_(iConfig.getParameter<std::string>("InputCard"))
 {  
   produces<edm::ValueMap<double> >("chi");  
 }
@@ -106,8 +108,7 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // Setup Shower Deconstruction 
    // Read input parameters
-   std::string inputcard = "../data/sd_input_card.dat";
-   AnalysisParameters param(inputcard);
+   AnalysisParameters param(input_card_);
 
    TopGluonModel *signal = 0;
    BackgroundModel *background = 0;
