@@ -1,0 +1,7 @@
+<use name="FWCore/Framework"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ParameterSet"/>
+<use name="DataFormats/JetReco"/>
+<use name="ShowerDeconstruction/SDAlgorithm"/>
+<flags cxxflags="-Wno-error=unused-but-set-variable -Wno-error=unused-variable"/>
+<flags EDM_PLUGIN="1"/>
