@@ -106,7 +106,7 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // Setup Shower Deconstruction 
    // Read input parameters
-   std::string inputcard = "input_card.dat";
+   std::string inputcard = "../data/sd_input_card.dat";
    AnalysisParameters param(inputcard);
 
    TopGluonModel *signal = 0;
