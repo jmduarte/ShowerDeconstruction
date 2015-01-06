@@ -22,7 +22,7 @@ echo "Removing TestAnalysis (we can't use it at the moment)"
 rm -v TestAnalysis.cc
 
 
-echo "Fix all include statements (this may take some time"
+echo "Fix all include statements (this may take some time)"
 source fix_includes.sh
 cd ../interface
 source fix_includes.sh
