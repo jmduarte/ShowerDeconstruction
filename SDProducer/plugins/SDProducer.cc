@@ -63,17 +63,19 @@ class SDProducer : public edm::EDProducer {
       virtual void endJob() override;
       
       // ----------member data ---------------------------
+     double microjet_cone_;
+     std::string fatjet_name_;  
 };
 
 
 //
 // constructors and destructor
 //
-SDProducer::SDProducer(const edm::ParameterSet& iConfig)
-{
-  
-  produces<edm::ValueMap<double> >("sd_chi");
-  
+SDProducer::SDProducer(const edm::ParameterSet& iConfig) :
+  microjet_cone_(iConfig.getParameter<double>("MicrojetCone")),
+  fatjet_name_(iConfig.getParameter<std::string>("FatjetName"))
+{  
+  produces<edm::ValueMap<double> >("chi");  
 }
 
 
@@ -93,17 +95,14 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace edm;
    using namespace Deconstruction;
 
-   double microjet_cone = 0.2;
 
    // Get Fatjets
    edm::Handle<reco::PFJetCollection> fatjets;
-   iEvent.getByLabel("ca08PFJetsCHS", fatjets);
+   iEvent.getByLabel(fatjet_name_, fatjets);
 
-
+   // Store the output here (later transfer to value map)
    std::vector<float> values;
    values.reserve(fatjets->size());
-
-   std::cout << "Welcome to SDProducer! We have " <<  fatjets->size() << " jets" << std::endl;
 
    // Setup Shower Deconstruction 
    // Read input parameters
@@ -145,7 +144,7 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      
      // Third: recluster to microjets
      fastjet::JetDefinition reclustering(fastjet::JetAlgorithm::kt_algorithm, 
-					 microjet_cone);
+					 microjet_cone_);
      fastjet::ClusterSequence * cs_micro = new fastjet::ClusterSequence(constituents, reclustering);
      std::vector<fastjet::PseudoJet> microjets = fastjet::sorted_by_pt(cs_micro->inclusive_jets());
 
@@ -159,23 +158,22 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      double Psignal = 0.0;
      double Pbackground = 0.0;
      try {
-       double chi = deconstruct->deconstruct(microjets, Psignal, Pbackground);	
-       std::cout << "chi = " << chi << std::endl;
+       double chi = deconstruct->deconstruct(microjets, Psignal, Pbackground);	       
        values.push_back(chi);
      } catch(Deconstruction::Exception &e) {       
        std::cout << "Exception while running SD: " << e.what() << std::endl;
        values.push_back(std::numeric_limits<double>::quiet_NaN());
      }
-
                
    } // end of fatjet loop
 
+
+   // Create output value map and add to event
    std::auto_ptr<edm::ValueMap<double> > out(new edm::ValueMap<double>());
    edm::ValueMap<double>::Filler filler(*out);
    filler.insert(fatjets, values.begin(), values.end());
    filler.fill();
-
-   iEvent.put(out, "sd_chi");       
+   iEvent.put(out, "chi");       
 }
 
 
