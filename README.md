@@ -1,4 +1,5 @@
-# Shower Deconstruction algorithm and interface to CMSSW.
+# Shower Deconstruction 
+(Algorithm and interface to CMSSW)
 ---
 
 * **SDAlgorithm:** SD code. Modified to compile as CMSSW library.
