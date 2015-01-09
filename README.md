@@ -1,7 +1,9 @@
 # Shower Deconstruction 
 
 Contains SD algorithm and interface for CMMSW.
+
 http://arxiv.org/abs/1211.3140
+
 http://arxiv.org/abs/1102.3480
 
 * **SDAlgorithm:** SD code. Modified to compile as CMSSW library.
