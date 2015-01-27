@@ -142,10 +142,31 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
        constituents.push_back(pj);
      } // end of constituent loop
 
+     // Second and a half: If the microjet cone-size is smaller than zero
+     // determine is a function of the fatjet-pT
+     // Otherwise: use the passed value
+     double microconesize;
+     if  (microjet_cone_<0){
+       // From Tobias:
+       // 0..500   -> 0.3
+       // 500..700 -> 0.2
+       // 700..inf -> 0.
+       if (fj_it->pt() < 500)
+	 microconesize=0.3;
+       else if (fj_it->pt() < 700)
+	 microconesize=0.2;
+       else
+	 microconesize=0.1;             
+     }
+     else{
+       microconesize = microjet_cone_;
+     }
+       
+
+     
      
      // Third: recluster to microjets
-     fastjet::JetDefinition reclustering(fastjet::JetAlgorithm::kt_algorithm, 
-					 microjet_cone_);
+     fastjet::JetDefinition reclustering(fastjet::JetAlgorithm::kt_algorithm, microconesize);
      fastjet::ClusterSequence * cs_micro = new fastjet::ClusterSequence(constituents, reclustering);
      std::vector<fastjet::PseudoJet> microjets = fastjet::sorted_by_pt(cs_micro->inclusive_jets());
 
