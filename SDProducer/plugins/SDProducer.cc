@@ -78,6 +78,7 @@ SDProducer::SDProducer(const edm::ParameterSet& iConfig) :
   input_card_(iConfig.getParameter<std::string>("InputCard"))
 {  
   produces<edm::ValueMap<double> >("chi");  
+  produces<edm::ValueMap<int> >("nmicrojets");  
 }
 
 
@@ -104,7 +105,9 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // Store the output here (later transfer to value map)
    std::vector<float> values;
+   std::vector<int> nmicrojets;
    values.reserve(fatjets->size());
+   nmicrojets.reserve(fatjets->size());
 
    // Setup Shower Deconstruction 
    // Read input parameters
@@ -161,15 +164,14 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      else{
        microconesize = microjet_cone_;
      }
-       
-
-     
-     
-     // Third: recluster to microjets
+            
+     // Third: recluster to microjets and count them
      fastjet::JetDefinition reclustering(fastjet::JetAlgorithm::kt_algorithm, microconesize);
      fastjet::ClusterSequence * cs_micro = new fastjet::ClusterSequence(constituents, reclustering);
-     std::vector<fastjet::PseudoJet> microjets = fastjet::sorted_by_pt(cs_micro->inclusive_jets());
-
+     std::vector<fastjet::PseudoJet> microjets = fastjet::sorted_by_pt(cs_micro->inclusive_jets(10.));
+     nmicrojets.push_back(microjets.size());
+     
+     //     std::cout << "SDProducer " << microjets.size() << std::endl;
 
      // Fourth: Make sure we have at most nine microjets
      if (microjets.size()>9) 
@@ -189,13 +191,19 @@ SDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                
    } // end of fatjet loop
 
-
-   // Create output value map and add to event
-   std::auto_ptr<edm::ValueMap<double> > out(new edm::ValueMap<double>());
-   edm::ValueMap<double>::Filler filler(*out);
+   // Create chi value map and add to event
+   std::auto_ptr<edm::ValueMap<double> > out_chi(new edm::ValueMap<double>());
+   edm::ValueMap<double>::Filler filler(*out_chi);
    filler.insert(fatjets, values.begin(), values.end());
    filler.fill();
-   iEvent.put(out, "chi");       
+   iEvent.put(out_chi, "chi");       
+
+   // Create nmicrojets value map and add to event
+   std::auto_ptr<edm::ValueMap<int> > out_nmj(new edm::ValueMap<int>());
+   edm::ValueMap<int>::Filler filler_nmj(*out_nmj);
+   filler_nmj.insert(fatjets, nmicrojets.begin(), nmicrojets.end());
+   filler_nmj.fill();
+   iEvent.put(out_nmj, "nmicrojets");       
 }
 
 
